@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS-OS // SURVEILLANCE v2.6</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --alert-red: #ff3e3e;
+            --bg-deep: #020406;
+            --panel-glass: rgba(10, 20, 30, 0.85);
+            --border-ui: rgba(0, 242, 255, 0.3);
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--neon-blue);
+            font-family: var(--font-mono);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            height: 100vh;
+        }
+
+        /* --- UI OVERLAY --- */
+        .hud-panel {
+            background: var(--panel-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-ui);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .hud-panel::before {
+            content: "SECURED CHANNEL // 0xAF26";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-deep);
+            padding: 0 10px;
+            font-size: 0.7rem;
+            border: 1px solid var(--border-ui);
+        }
+
+        /* --- LOGS & TELEMETRY --- */
+        #activityLog {
+            flex-grow: 1;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            color: rgba(0, 242, 255, 0.6);
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-ui);
+            padding-top: 1rem;
+        }
+
+        .log-entry { margin-bottom: 5px; }
+        .log-time { color: var(--alert-red); margin-right: 8px; }
+
+        /* --- INTERACTIVE CANVAS --- */
+        #viewport {
+            position: relative;
+            background: radial-gradient(circle at center, #0a1018 0%, #020406 100%);
+            cursor: crosshair;
+        }
+
+        canvas { width: 100%; height: 100%; }
+
+        /* --- ADVANCED CONTROLS --- */
+        .control-group { margin-bottom: 2rem; }
+        label { display: block; font-size: 0.8rem; margin-bottom: 10px; text-transform: uppercase; }
+        
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--neon-blue);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .scanline {
+            width: 100%; height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(0,242,255,0.05), transparent);
+            position: absolute;
+            top: -100px;
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            from { top: -10%; }
+            to { top: 110%; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="hud-panel left">
+        <div class="control-group">
+            <label>Neural Density</label>
+            <input type="range" id="density" min="50" max="300" value="150">
+        </div>
+        <div class="control-group">
+            <label>Synapse Range</label>
+            <input type="range" id="range" min="50" max="250" value="120">
+        </div>
+        <div id="activityLog"></div>
+    </aside>
+
+    <main id="viewport">
+        <div class="scanline"></div>
+        <canvas id="nexusCanvas"></canvas>
+    </main>
+
+    <aside class="hud-panel right">
+        <div class="stat-card">
+            <label>CPU Latency</label>
+            <div id="latencyDisplay">1.2ms</div>
+        </div>
+        <div class="stat-card" style="margin-top: 2rem;">
+            <label>Global Time (UTC)</label>
+            <div id="clockDisplay">00:00:00</div>
+        </div>
+    </aside>
+
+    <script>
+        /**
+         * COMPLEX SYSTEM ENGINE v2.6 (ES2026 Ready)
+         * Implements Object Pooling and Proximity Mapping
+         */
+        class Node {
+            constructor(w, h) {
+                this.reset(w, h);
+            }
+
+            reset(w, h) {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.pulse = Math.random() * Math.PI;
+            }
+
+            update(w, h) {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.pulse += 0.05;
+
+                if (this.x < 0 || this.x > w) this.vx *= -1;
+                if (this.y < 0 || this.y > h) this.vy *= -1;
+            }
+        }
+
+        class Engine {
+            constructor() {
+                this.canvas = document.getElementById('nexusCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.nodes = [];
+                this.densityInput = document.getElementById('density');
+                this.rangeInput = document.getElementById('range');
+                this.log = document.getElementById('activityLog');
+                
+                this.setup();
+                this.loop();
+                this.startTelemetry();
+            }
+
+            setup() {
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = this.canvas.offsetHeight;
+                this.nodes = Array.from({length: this.densityInput.value}, () => new Node(this.canvas.width, this.canvas.height));
+                
+                // Adaptive ResizeObserver for 2026 standards
+                new ResizeObserver(() => {
+                    this.canvas.width = this.canvas.offsetWidth;
+                    this.canvas.height = this.canvas.offsetHeight;
+                }).observe(document.getElementById('viewport'));
+            }
+
+            addLog(msg) {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+                this.log.prepend(entry);
+                if (this.log.children.length > 20) this.log.lastChild.remove();
+            }
+
+            startTelemetry() {
+                setInterval(() => {
+                    document.getElementById('clockDisplay').innerText = new Date().toISOString().split('T')[1].split('.')[0];
+                    if (Math.random() > 0.8) this.addLog(`NODE_LINK_ESTABLISHED: ${Math.floor(Math.random()*1000)}ms`);
+                }, 1000);
+            }
+
+            loop() {
+                const t0 = performance.now();
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const range = this.rangeInput.value;
+                const count = this.nodes.length;
+
+                // Neural Synapse Math (Optimized Nested Loop)
+                for (let i = 0; i < count; i++) {
+                    const n1 = this.nodes[i];
+                    n1.update(this.canvas.width, this.canvas.height);
+
+                    for (let j = i + 1; j < count; j++) {
+                        const n2 = this.nodes[j];
+                        const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
+
+                        if (dist < range) {
+                            this.ctx.beginPath();
+                            this.ctx.strokeStyle = `rgba(0, 242, 255, ${1 - dist/range})`;
+                            this.ctx.lineWidth = 0.5;
+                            this.ctx.moveTo(n1.x, n1.y);
+                            this.ctx.lineTo(n2.x, n2.y);
+                            this.ctx.stroke();
+                        }
+                    }
+
+                    // Draw Node Core
+                    const glow = Math.sin(n1.pulse) * 2 + 3;
+                    this.ctx.fillStyle = '#00f2ff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(n1.x, n1.y, glow/2, 0, Math.PI*2);
+                    this.ctx.fill();
+                }
+
+                document.getElementById('latencyDisplay').innerText = `${(performance.now() - t0).toFixed(2)}ms`;
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        // Initialize v2.6
+        const system = new Engine();
+
+        // High-level Density Interaction
+        document.getElementById('density').oninput = (e) => {
+            const val = parseInt(e.target.value);
+            if (val > system.nodes.length) {
+                for(let i=0; i < val - system.nodes.length; i++) system.nodes.push(new Node(system.canvas.width, system.canvas.height));
+            } else {
+                system.nodes.length = val;
+            }
+            system.addLog(`CORE_DENSITY_RECALIBRATED: ${val} NODES`);
+        };
+    </script>
+</body>
+</html>
