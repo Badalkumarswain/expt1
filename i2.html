@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function abc(){
+            var a=document.getElementById("x").value;
+            if(a=="red")
+            document.bgColor="red";
+            else if(a=="green")
+            document.bgColor="green";
+            else if(a=="blue")
+            document.bgColor="blue";
+            else if(a=="yellow")
+            document.bgColor="yellow";
+            else if(a=="none")
+            document.bgColor="white";
+        }
+    </script>
+</head>
+<body>
+    <select id="x" onchange="abc()">
+        <option value="none">none</option>
+        <option value="red">Red</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="yellow">Yellow</option>
+    </select>
+</body>
+</html>

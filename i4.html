@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function abc(){
+            var x = document.getElementById("x");
+            if(x.style.display="none"){
+                x.style.display = "block";
+            }
+            else{
+                x.style.display = "none";
+            }
+        }
+    </script>
+</head>
+<body>
+    <p id="x" style="display: none;">
+        A paragraph is a 
+        self-contained unit of 
+        discourse in writing that 
+        focuses on a single, 
+        coherent idea, usually 
+        consisting of a topic 
+        sentence, supporting 
+        details, and a concluding 
+        sentence. It serves to 
+        organize extended prose 
+        by grouping related 
+        sentences together, often 
+        indicated by an indented 
+        first line or a blank 
+        space. Effective 
+        paragraphs are unified, 
+        well-developed, and 
+        provide necessary context 
+        or evidence to support the 
+        main point, ranging
+    </p>
+    <button onclick="abc()">Toggle</button>
+</body>
+</html>
